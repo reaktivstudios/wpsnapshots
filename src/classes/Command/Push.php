@@ -44,6 +44,7 @@ class Push extends Command {
 		$this->addOption( 'db_password', null, InputOption::VALUE_REQUIRED, 'Database password.' );
 		$this->addOption( 'exclude', false, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Exclude a file or directory from the snapshot.' );
 		$this->addOption( 'exclude_uploads', false, InputOption::VALUE_NONE, 'Exclude uploads from pushed snapshot.' );
+		$this->addOption( 'project', null, InputOption::VALUE_REQUIRED, 'Name of the project.');
 	}
 
 	/**
@@ -56,6 +57,7 @@ class Push extends Command {
 		Log::instance()->setOutput( $output );
 
 		$snapshot_id = $input->getArgument( 'snapshot_id' );
+		$project = $input->getOption( 'project' );
 
 		if ( empty( $snapshot_id ) ) {
 			$repository = RepositoryManager::instance()->setup( $input->getOption( 'repository' ) );
@@ -80,7 +82,9 @@ class Push extends Command {
 			$project_question = new Question( 'Project Slug (letters, numbers, _, and - only): ' );
 			$project_question->setValidator( '\WPSnapshots\Utils\slug_validator' );
 
-			$project = $helper->ask( $input, $output, $project_question );
+			if ( !$project ) {
+				$project = $helper->ask( $input, $output, $project_question );
+			}
 
 			$description_question = new Question( 'Snapshot Description (e.g. Local environment): ' );
 			$description_question->setValidator( '\WPSnapshots\Utils\not_empty_validator' );
